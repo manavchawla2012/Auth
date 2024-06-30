@@ -1,0 +1,57 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "rootDir": "src",
+    "target": "ES2020",
+    "module": "commonjs",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "paths": {
+      "@interfaces/*": [
+        "src/interfaces/*"
+      ],
+      "@dataUtils/*": [
+        "src/dataUtils/*"
+      ],
+      "@exceptions/*": [
+        "src/exceptions/*"
+      ],
+      "@routes/*": [
+        "src/routes/*"
+      ],
+      "@middlewares/*": [
+        "src/middlewares/*"
+      ],
+      "@utils/*": [
+        "src/utils/*"
+      ],
+      "@/*": [
+        "src/*"
+      ]
+    }
+  },
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules"
+  ],
+  "typeRoots": [
+    "src/**/*",
+    "src/types/express/index.d.ts"
+  ]
+}
