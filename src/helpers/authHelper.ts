@@ -12,12 +12,13 @@ import {
     SESSION_EXPIRY_SECONDS
 } from "@/settings";
 import UserPayload from "@interfaces/userPayload";
-import UserDataUtils from "@dataUtils/userDataUtils";
 import {UnauthorizedException} from "@exceptions/response";
 import StringHelper from "@/helpers/stringHelper";
 import CacheHelper from "@/helpers/cacheHelper";
 import cacheHelper from "@/helpers/cacheHelper";
 import crypto from 'crypto';
+import UserDataUtils from "@dataUtils/userDataUtils";
+import moment from "moment";
 
 
 interface Token {
@@ -27,24 +28,26 @@ interface Token {
 
 
 class AuthHelper {
-
-    static instance: AuthHelper | null = null
+    private static _instance: AuthHelper;
     private readonly publicKey;
     private readonly privateKey;
-    private userDataUtils;
     private readonly algorithm;
 
 
     constructor() {
-        if (AuthHelper.instance == null) {
-            AuthHelper.instance = this;
-        }
         // Initialize your AuthHelper variables and properties here
         this.privateKey = fs.readFileSync(path.resolve(__dirname, '../../private.pem'), 'utf8');
         this.publicKey = fs.readFileSync(path.resolve(__dirname, '../../public.pem'), 'utf8');
-        this.userDataUtils = new UserDataUtils();
         this.algorithm = JWT_ALGORITHM;
-        return AuthHelper.instance;
+    }
+
+
+    static getInstance() {
+        if (this._instance) {
+            return this._instance;
+        }
+        this._instance = new AuthHelper();
+        return this._instance;
     }
 
 
@@ -69,7 +72,9 @@ class AuthHelper {
         });
         await Promise.allSettled(
             [
-                CacheHelper.set(userSessionCacheKey, {}.toString(), {
+                CacheHelper.set(userSessionCacheKey, {
+                    loggedInAt: moment().unix(),
+                }.toString(), {
                     EX: SESSION_EXPIRY_SECONDS
                 })
             ]
@@ -91,19 +96,20 @@ class AuthHelper {
             email: user.email,
             phone: user.phone,
             createdAt: user.createdAt,
+            role: user.role,
             sessionId,
         }
     }
 
 
     generateNewTokenUsingRefreshToken = async (refreshToken: string): Promise<Token> => {
-        const payload = this.verifyJwtToken(refreshToken);
+        const payload = await this.verifyJwtToken(refreshToken);
         if (!payload) {
             throw new UnauthorizedException({"message": "Token expired"});
         } else {
             const cacheRefreshToken = 0
         }
-        const user = await this.userDataUtils.findById(payload.id as unknown as number)
+        const user = await new UserDataUtils().findById(payload.id as unknown as number)
         if (!user) {
             throw new UnauthorizedException({"message": "User not found"})
         }
@@ -114,11 +120,11 @@ class AuthHelper {
 
     // Verify JWT token
     // Can be used for both token and refresh token's
-    verifyJwtToken = (token: string): UserPayload | null => {
+    verifyJwtToken = async (token: string): Promise<UserPayload | null> => {
         try {
             const payload = jwt.verify(token, this.publicKey, {algorithms: [this.algorithm]}) as UserPayload;
             const cacheKey = this.getUserSessionCacheKey(payload.id, payload.sessionId);
-            if (cacheHelper.get(cacheKey) !== undefined) {
+            if (await cacheHelper.get(cacheKey)) {
                 return payload
             } else {
                 return null
@@ -142,7 +148,7 @@ class AuthHelper {
     verifyPassword = (password: string, hashedPassword: string): boolean => {
         const [algorithm, iterations, salt, hash] = hashedPassword.split('$');
         if (algorithm !== 'pbkdf2_sha256') {
-            throw new Error(`Unsupported hash algorithm: ${algorithm}`);
+            return false;
         }
 
         const derivedKey = crypto.pbkdf2Sync(password, salt, parseInt(iterations), 32, 'sha256').toString('base64');
@@ -160,7 +166,7 @@ class AuthHelper {
 
 }
 
-const instance = new AuthHelper()
+const instance = AuthHelper.getInstance()
 
 
 export default instance;

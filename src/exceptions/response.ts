@@ -28,7 +28,7 @@ export class CustomException extends Error {
         this.name = this.constructor.name;
         this.statusCode = details.statusCode ?? 500;
         this.data = details.data ?? {};
-        Error.captureStackTrace(this, this.constructor);
+        //Error.captureStackTrace(this, this.constructor);
     }
 }
 

@@ -8,5 +8,6 @@ const userController = new UserController();
 
 // Login Required Routes
 router.post('/', authenticateMiddleware, userController.createUser);
+router.get('/', authenticateMiddleware, userController.getUserDetails);
 
 export default router;

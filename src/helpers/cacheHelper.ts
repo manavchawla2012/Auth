@@ -22,11 +22,11 @@ class CacheHelper {
     };
 
     static smembers = async (key: string): Promise<string[]> => {
-        return await redisClient.sMembers(prepareCacheKey(key));
+        return redisClient.sMembers(prepareCacheKey(key));
     };
 
     static keys = async (patternKey: string): Promise<string[]> => {
-        return await redisClient.keys(prepareCacheKey(patternKey));
+        return redisClient.keys(prepareCacheKey(patternKey));
     };
 
     static deleteAllByPattern = async (patternKey: string): Promise<number> => {

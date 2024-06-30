@@ -1,4 +1,4 @@
-interface UserPayload{
+interface UserPayload {
     // User Data
 
     id: bigint;
@@ -7,6 +7,7 @@ interface UserPayload{
     email: string;
     phone: string;
     createdAt: Date;
+    role: number;
 
     // Extra Data
     sessionId: string;

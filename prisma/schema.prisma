@@ -8,63 +8,63 @@ datasource db {
 }
 
 model User {
-  id             BigInt           @id @default(autoincrement())
-  firstName      String           @db.VarChar(100)
-  lastName       String           @db.VarChar(100)
-  email          String           @unique @db.VarChar(100)
-  phone          String           @unique @db.VarChar(10)
-  password       String           @db.VarChar(255)
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  UseRoleMapping UseRoleMapping[]
+  id              BigInt            @id @default(autoincrement())
+  firstName       String            @db.VarChar(100)
+  lastName        String            @db.VarChar(100)
+  email           String            @unique @db.VarChar(100)
+  phone           String            @unique @db.VarChar(10)
+  password        String            @db.VarChar(255)
+  role            Int
+  dateJoined      DateTime          @default(now())
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  UseGroupMapping UseGroupMapping[]
 
   @@map("user")
 }
 
-model Roles {
-  id               Int                @id @default(autoincrement())
-  name             String             @unique @db.VarChar(100)
-  display_name     String?            @db.VarChar(100)
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  RolesPermissions RolesPermissions[]
-  UseRoleMapping   UseRoleMapping[]
+model Groups {
+  id                Int                 @id @default(autoincrement())
+  name              String              @unique @db.VarChar(100)
+  display_name      String?             @db.VarChar(100)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  GroupsPermissions GroupsPermissions[]
+  UseGroupMapping   UseGroupMapping[]
 
-  @@map("roles")
+  @@map("groups")
 }
 
 model Permissions {
-  id               Int                @id @default(autoincrement())
-  name             String             @unique @db.VarChar(100)
-  display_name     String?            @db.VarChar(100)
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  RolesPermissions RolesPermissions[]
+  id               Int                 @id @default(autoincrement())
+  name             String              @unique @db.VarChar(100)
+  display_name     String?             @db.VarChar(100)
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  GroupPermissions GroupsPermissions[]
 
   @@map("permissions")
 }
 
-model RolesPermissions {
+model GroupsPermissions {
   id            Int         @id @default(autoincrement())
-  roleId        Int
-  role          Roles       @relation(fields: [rolesId], references: [id])
+  groupId       Int
+  group         Groups      @relation(fields: [groupId], references: [id])
   permissionId  Int
   permission    Permissions @relation(fields: [permissionsId], references: [id])
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
-  rolesId       Int
   permissionsId Int
 
-  @@map("roles_permissions")
+  @@map("groups_permissions")
 }
 
-model UseRoleMapping {
+model UseGroupMapping {
   id      BigInt @id @default(autoincrement())
   userId  BigInt
   user    User   @relation(fields: [userId], references: [id])
-  roleId  Int
-  role    Roles  @relation(fields: [rolesId], references: [id])
-  rolesId Int
+  groupId Int
+  group   Groups @relation(fields: [groupId], references: [id])
 
-  @@map("user_role_mapping")
+  @@map("user_group_mapping")
 }
